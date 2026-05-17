@@ -1,5 +1,5 @@
 
-function page() {
+function Home() {
     return (
         <div className="p-8">
             <h1 className="font-heading text-4xl font-bold">
@@ -13,4 +13,4 @@ function page() {
     )
 }
 
-export default page
+export default Home
