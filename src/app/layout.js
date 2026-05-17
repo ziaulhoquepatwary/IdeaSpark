@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
         <html lang="en"
             className={`${josefinSans.variable} ${patuaOne.variable} font-sans antialiased min-h-screen flex flex-col`}
         >
-            <body className="min-h-full">
+            <body className="min-h-full bg-white text-gray-900 dark:bg-[#0A0A0A] dark:text-gray-100 transition-colors duration-300">
                 {children}
             </body>
         </html>
