@@ -1,7 +1,9 @@
 
-function AuthLayout() {
+function AuthLayout({ children }) {
     return (
-        <div>AuthLayout</div>
+        <div className="auth-container">
+            {children}
+        </div>
     )
 }
 
