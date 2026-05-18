@@ -5,12 +5,16 @@ const josefinSans = Josefin_Sans({
     subsets: ['latin'],
     weight: ['400', '700'],
     variable: '--font-josefin',
+    display: 'swap',
+    preload: true,
 });
 
 const patuaOne = Patua_One({
     subsets: ['latin'],
     weight: ['400'],
     variable: '--font-patua',
+    display: 'swap',
+    preload: true,
 });
 
 export const metadata = {
