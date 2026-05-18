@@ -3,56 +3,35 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, Mail, Lock, User, Image as ImageIcon, ArrowRight, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowRight, ArrowLeft, X, Send } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { FaHome } from "react-icons/fa";
-import { useRouter, useSearchParams } from "next/navigation";
-import { authClient } from '@/lib/auth-client';
-import Swal from "sweetalert2";
 
-
-function Register() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
+const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
+    const [isForgotOpen, setIsForgotOpen] = useState(false);
 
     const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
-    const getRedirectUrl = () => {
-        const redirect = searchParams.get("redirect") || searchParams.get("callbackUrl");
-        return redirect || "/";
+    const { register: registerForgot, handleSubmit: handleForgotSubmit, formState: { errors: forgotErrors }, reset: resetForgotForm } = useForm();
+
+
+    const onLoginSubmit = async (userData) => {
+        console.log("Login Form Data:", userData);
+
     };
 
-    const onSubmit = async (userData) => {
-        console.log("Register Form Data:", userData);
 
-        const { data, error } = await authClient.signUp.email({
-            name: userData.name,
-            email: userData.email,
-            password: userData.password,
-            image: userData.imageUrl
-        })
+    const onForgotSubmit = (data) => {
+        console.log("Password Reset Requested For:", data.forgotEmail);
 
-        console.log(data, error);
-
-        if (error) {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: "Something went wrong during registration. Please try again.",
-            });
-            reset();
-        } else {
-            router.push(getRedirectUrl());
-        }
+        setIsForgotOpen(false);
+        resetForgotForm();
     };
 
     const handleGoogleLogin = async () => {
-        await authClient.signIn.social({
-            provider: "google",
-        });
-    };
 
+    };
 
     return (
         <section className="min-h-screen bg-white dark:bg-[#0A0A0A] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300 relative">
@@ -76,42 +55,17 @@ function Register() {
                 {/* Header Section */}
                 <div className="text-center space-y-2">
                     <h2 className="text-3xl font-extrabold font-heading tracking-tight text-gray-950 dark:text-white">
-                        Create Your <span className="text-emerald-600 dark:text-emerald-500">Account</span>
+                        Welcome <span className="text-emerald-600 dark:text-emerald-500">Back</span>
                     </h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Join IdeaSpark to validate and spark your next big venture.
+                        Sign in to continue sharing and validating your next big ideas.
                     </p>
                 </div>
 
-                {/* Main Form */}
-                <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
+                {/* Login Form */}
+                <form onSubmit={handleSubmit(onLoginSubmit)} className="mt-4 space-y-4">
 
-                    {/* 1. Name Field */}
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">
-                            Full Name
-                        </label>
-                        <div className="relative">
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
-                                <User size={18} />
-                            </span>
-                            <input
-                                type="text"
-                                placeholder="Your Name"
-                                {...register("name", { required: "Name is required" })}
-                                className={`w-full pl-11 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all duration-200 text-gray-900 dark:text-white
-                                    ${errors.name
-                                        ? "border-red-500 focus:ring-red-500/20"
-                                        : "border-gray-200 dark:border-gray-800 focus:border-emerald-500 focus:ring-emerald-500/20"
-                                    }`}
-                            />
-                        </div>
-                        {errors.name && (
-                            <p className="text-xs text-red-500 font-medium pl-1">{errors.name.message}</p>
-                        )}
-                    </div>
-
-                    {/* 2. Email Field */}
+                    {/* 1. Email Field */}
                     <div className="space-y-1">
                         <label className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">
                             Email Address
@@ -142,11 +96,22 @@ function Register() {
                         )}
                     </div>
 
-                    {/* 3. Password Field with Strict Uppercase/Lowercase Validation */}
+                    {/* 2. Password Field & Forgot Password trigger */}
                     <div className="space-y-1">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">
-                            Password
-                        </label>
+                        <div className="flex justify-between items-center">
+                            <label className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">
+                                Password
+                            </label>
+
+                            {/* NEW DETAILED FEATURE: Forgot Password Trigger */}
+                            <button
+                                type="button"
+                                onClick={() => setIsForgotOpen(true)}
+                                className="text-xs font-semibold text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors cursor-pointer"
+                            >
+                                Forgot Password?
+                            </button>
+                        </div>
                         <div className="relative">
                             <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
                                 <Lock size={18} />
@@ -156,11 +121,7 @@ function Register() {
                                 placeholder="••••••••"
                                 {...register("password", {
                                     required: "Password is required",
-                                    minLength: { value: 6, message: "Minimum 6 characters required" },
-                                    validate: {
-                                        hasUpper: (value) => /[A-Z]/.test(value) || "Must contain at least one uppercase letter",
-                                        hasLower: (value) => /[a-z]/.test(value) || "Must contain at least one lowercase letter"
-                                    }
+                                    minLength: { value: 6, message: "Password must be at least 6 characters" }
                                 })}
                                 className={`w-full pl-11 pr-12 py-3 bg-white dark:bg-[#0A0A0A] border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all duration-200 text-gray-900 dark:text-white
                                     ${errors.password
@@ -181,39 +142,21 @@ function Register() {
                         )}
                     </div>
 
-                    {/* 4. Image URL Field */}
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">
-                            Avatar Image URL <span className="text-gray-400 text-[10px] font-normal">(Optional)</span>
-                        </label>
-                        <div className="relative">
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
-                                <ImageIcon size={18} />
-                            </span>
-                            <input
-                                type="url"
-                                placeholder="https://example.com/avatar.png"
-                                {...register("imageUrl")}
-                                className="w-full pl-11 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-gray-800 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 text-gray-900 dark:text-white"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Submit Button */}
+                    {/* Login Submit Button */}
                     <button
                         type="submit"
                         className="w-full mt-2 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-medium py-3 rounded-xl transition-all duration-200 shadow-md shadow-emerald-600/10 group text-sm cursor-pointer"
                     >
-                        Register Account
+                        Login
                         <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
                     </button>
                 </form>
 
                 {/* Divider Line */}
                 <div className="relative flex py-1 items-center">
-                    <div className="flex-grow border-t border-gray-200 dark:border-gray-800"></div>
-                    <span className="flex-shrink mx-4 text-xs text-gray-400 uppercase tracking-wider font-semibold">Or connect with</span>
-                    <div className="flex-grow border-t border-gray-200 dark:border-gray-800"></div>
+                    <div className="grow border-t border-gray-200 dark:border-gray-800"></div>
+                    <span className="shrink mx-4 text-xs text-gray-400 uppercase tracking-wider font-semibold">Or connect with</span>
+                    <div className="grow border-t border-gray-200 dark:border-gray-800"></div>
                 </div>
 
                 {/* Google Social Login */}
@@ -226,22 +169,86 @@ function Register() {
                     Continue with Google
                 </button>
 
-                {/* Navigation To Login Page */}
+                {/* Navigation To Register Page */}
                 <div className="text-center pt-1">
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Already have an account?{" "}
+                        Don&apos;t have an account?{" "}
                         <Link
-                            href="/login"
+                            href="/register"
                             className="font-semibold text-orange-500 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
                         >
-                            Login
+                            Register
                         </Link>
                     </p>
                 </div>
 
             </div>
-        </section>
-    )
-}
 
-export default Register
+            {/*  FORGOT PASSWORD MODAL (POP-UP) */}
+            {isForgotOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-950/40 dark:bg-black/60 backdrop-blur-md transition-all">
+                    <div className="bg-white dark:bg-[rgb(17,17,17)] max-w-sm w-full p-6 rounded-3xl border border-gray-100 dark:border-gray-900 shadow-2xl space-y-4 relative animate-in fade-in zoom-in-95 duration-200">
+
+                        {/* Close Modal Button */}
+                        <button
+                            type="button"
+                            onClick={() => { setIsForgotOpen(false); resetForgotForm(); }}
+                            className="absolute top-4 right-4 p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
+                        >
+                            <X size={16} />
+                        </button>
+
+                        <div className="space-y-1 pr-6">
+                            <h3 className="text-lg font-bold text-gray-950 dark:text-white font-heading">
+                                Reset Your Password
+                            </h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-normal">
+                                Enter your registered email below, and we will send you a secure link to reset your password.
+                            </p>
+                        </div>
+
+                        {/* Reset Form inside Modal */}
+                        <form onSubmit={handleForgotSubmit(onForgotSubmit)} className="space-y-3">
+                            <div className="space-y-1">
+                                <div className="relative">
+                                    <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-gray-400">
+                                        <Mail size={16} />
+                                    </span>
+                                    <input
+                                        type="email"
+                                        placeholder="yourname@email.com"
+                                        {...registerForgot("forgotEmail", {
+                                            required: "Email is required to reset password",
+                                            pattern: {
+                                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                                message: "Invalid email address"
+                                            }
+                                        })}
+                                        className={`w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-[#0A0A0A] border rounded-xl text-xs focus:outline-none focus:ring-2 transition-all duration-200 text-gray-900 dark:text-white
+                                            ${forgotErrors.forgotEmail
+                                                ? "border-red-500 focus:ring-red-500/20"
+                                                : "border-gray-200 dark:border-gray-800 focus:border-emerald-500 focus:ring-emerald-500/20"
+                                            }`}
+                                    />
+                                </div>
+                                {forgotErrors.forgotEmail && (
+                                    <p className="text-[11px] text-red-500 font-medium pl-1">{forgotErrors.forgotEmail.message}</p>
+                                )}
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-medium py-2.5 rounded-xl transition-all duration-200 text-xs cursor-pointer shadow-sm"
+                            >
+                                <Send size={12} />
+                                Send Reset Link
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </section>
+    );
+};
+
+export default LoginPage;
