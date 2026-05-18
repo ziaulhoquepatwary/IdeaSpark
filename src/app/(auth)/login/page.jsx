@@ -6,31 +6,75 @@ import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Mail, Lock, ArrowRight, ArrowLeft, X, Send } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { FaHome } from "react-icons/fa";
+import { authClient } from "@/lib/auth-client";
+import { useRouter, useSearchParams } from "next/navigation";
+import Swal from "sweetalert2";
 
 const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isForgotOpen, setIsForgotOpen] = useState(false);
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
     const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
     const { register: registerForgot, handleSubmit: handleForgotSubmit, formState: { errors: forgotErrors }, reset: resetForgotForm } = useForm();
 
+    const getRedirectUrl = () => {
+        const redirect = searchParams.get("redirect") || searchParams.get("callbackUrl");
+        return redirect || "/";
+    };
+
 
     const onLoginSubmit = async (userData) => {
         console.log("Login Form Data:", userData);
+        const { data, error } = await authClient.signIn.email({
+            email: userData.email,
+            password: userData.password,
+        });
 
+        if (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Something went wrong during Login. Please try again.",
+            });
+            reset();
+        } else {
+            router.push(getRedirectUrl());
+        }
     };
 
 
-    const onForgotSubmit = (data) => {
-        console.log("Password Reset Requested For:", data.forgotEmail);
+    const onForgotSubmit = async (data) => {
+        const { error } = await authClient.requestPasswordReset({
+            email: data.forgotEmail,
+            redirectTo: `${window.location.origin}/reset-password`
+        });
 
         setIsForgotOpen(false);
         resetForgotForm();
+
+        if (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Failed!",
+                text: error.message || "Something went wrong. Please try again.",
+            });
+        } else {
+            Swal.fire({
+                icon: "success",
+                title: "Email Sent!",
+                text: `A password reset link has been sent to ${data.forgotEmail}. Please check your inbox.`,
+                confirmButtonColor: "#10b981",
+            });
+        }
     };
 
     const handleGoogleLogin = async () => {
-
+        await authClient.signIn.social({
+            provider: "google",
+        });
     };
 
     return (
