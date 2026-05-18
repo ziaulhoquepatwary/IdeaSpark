@@ -6,20 +6,51 @@ import { useForm } from "react-hook-form";
 import { Eye, EyeOff, Mail, Lock, User, Image as ImageIcon, ArrowRight, ArrowLeft } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { FaHome } from "react-icons/fa";
+import { useRouter, useSearchParams } from "next/navigation";
+import { authClient } from '@/lib/auth-client';
+import Swal from "sweetalert2";
 
 
 function Register() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [showPassword, setShowPassword] = useState(false);
 
-    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { register, handleSubmit, formState: { errors }, reset } = useForm();
 
-    const onSubmit = (data) => {
-        console.log("Register Form Data:", data);
-        
+    const getRedirectUrl = () => {
+        const redirect = searchParams.get("redirect") || searchParams.get("callbackUrl");
+        return redirect || "/";
     };
 
-    const handleGoogleLogin = () => {
-        console.log("Google Login Triggered");
+    const onSubmit = async (userData) => {
+        console.log("Register Form Data:", userData);
+
+        const { data, error } = await authClient.signUp.email({
+            name: userData.name,
+            email: userData.email,
+            password: userData.password,
+            image: userData.imageUrl
+        })
+
+        console.log(data, error);
+
+        if (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Something went wrong during registration. Please try again.",
+            });
+            reset();
+        } else {
+            router.push(getRedirectUrl());
+        }
+    };
+
+    const handleGoogleLogin = async () => {
+        await authClient.signIn.social({
+            provider: "google",
+        });
     };
 
 
