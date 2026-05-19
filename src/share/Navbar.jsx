@@ -4,13 +4,20 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaHome, FaLightbulb, FaPlusCircle, FaBookmark, FaCommentDots, FaMoon, FaSun, FaBars, FaTimes, FaSignInAlt, FaUserPlus, } from "react-icons/fa";
+import { authClient } from "@/lib/auth-client";
+import { LogOut, User } from "lucide-react";
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [theme, setTheme] = useState("dark");
     const [mounted, setMounted] = useState(false);
-
+    const [avatarMenuOpen, setAvatarMenuOpen] = useState(false);
+    const { data: session, isPending } = authClient.useSession();
     const pathname = usePathname();
+
+    const user = session?.user;
+    // console.log(user);
+
 
     useEffect(() => {
         const savedTheme = localStorage.getItem("theme") || "dark";
@@ -79,15 +86,21 @@ const Navbar = () => {
                         <Link href="/ideas" className={getLinkClass("/ideas")}>
                             <FaLightbulb /> Ideas
                         </Link>
-                        <Link href="/add-idea" className={getLinkClass("/add-idea")}>
-                            <FaPlusCircle /> Add Idea
-                        </Link>
-                        <Link href="/my-ideas" className={getLinkClass("/my-ideas")}>
-                            <FaBookmark /> My Ideas
-                        </Link>
-                        <Link href="/interactions" className={getLinkClass("/interactions")}>
-                            <FaCommentDots /> My Interactions
-                        </Link>
+                        {
+                            user && (
+                                <>
+                                    <Link href="/add-idea" className={getLinkClass("/add-idea")}>
+                                        <FaPlusCircle /> Add Idea
+                                    </Link>
+                                    <Link href="/my-ideas" className={getLinkClass("/my-ideas")}>
+                                        <FaBookmark /> My Ideas
+                                    </Link>
+                                    <Link href="/interactions" className={getLinkClass("/interactions")}>
+                                        <FaCommentDots /> My Interactions
+                                    </Link>
+                                </>
+                            )
+                        }
                     </div>
 
                     {/* Right Side Icons & Auth — Desktop */}
@@ -99,14 +112,72 @@ const Navbar = () => {
                         >
                             {ThemeIcon}
                         </button>
-                        <Link href="/login" className="flex items-center gap-2 border border-gray-200 dark:border-gray-800 px-5 py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-all font-medium text-gray-700 dark:text-gray-300">
-                            <FaSignInAlt /> Login
-                        </Link>
+                        {
+                            isPending ? (
+                                <div className="w-9 h-9 rounded-full bg-sky-400 animate-pulse" />
+                            ) : user ? (
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setAvatarMenuOpen(prev => !prev)}
+                                        className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#42D3F2] hover:opacity-90 transition-opacity"
+                                    >
+                                        <img
+                                            src={user?.image || "/user.png"}
+                                            alt={user?.name}
+                                            className="object-cover w-10 h-10"
+                                        />
+                                    </button>
 
-                        {/* Register Button */}
-                        <Link href="/register" className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl transition-all font-medium shadow-sm shadow-emerald-600/10">
-                            <FaUserPlus /> Register
-                        </Link>
+                                    {/* Desktop Avatar Dropdown with Dark Mode Support */}
+                                    {avatarMenuOpen && (
+                                        <div className="absolute right-0 top-12 w-56 bg-white dark:bg-[#0A0A0A] rounded-xl border border-gray-100 dark:border-gray-800 shadow-lg shadow-cyan-50 dark:shadow-none z-50">
+                                            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-800">
+                                                <img
+                                                    src={user?.image || "/user.png"}
+                                                    alt={user?.name}
+                                                    className="w-10 h-10 rounded-full object-cover"
+                                                />
+                                                <div className="overflow-hidden">
+                                                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{user?.name}</p>
+                                                    <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{user?.email}</p>
+                                                </div>
+                                            </div>
+
+                                            <div className="p-2">
+                                                <Link
+                                                    href="/my-profile"
+                                                    onClick={() => setAvatarMenuOpen(false)}
+                                                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-300 rounded-lg hover:bg-cyan-50 dark:hover:bg-gray-900 hover:text-[#42D3F2] dark:hover:text-[#42D3F2] transition-colors"
+                                                >
+                                                    <User size={15} />
+                                                    My Profile
+                                                </Link>
+                                                <button
+                                                    onClick={() => {
+                                                        setAvatarMenuOpen(false);
+                                                        authClient.signOut();
+                                                    }}
+                                                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                                                >
+                                                    <LogOut size={15} />
+                                                    Logout
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="flex gap-2">
+                                    <Link href="/login" className="flex items-center gap-2 border border-gray-200 dark:border-gray-800 px-5 py-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-900 transition-all font-medium text-gray-700 dark:text-gray-300">
+                                        <FaSignInAlt /> Login
+                                    </Link>
+
+                                    <Link href="/register" className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl transition-all font-medium shadow-sm shadow-emerald-600/10">
+                                        <FaUserPlus /> Register
+                                    </Link>
+                                </div>
+                            )
+                        }
                     </div>
 
                     {/* Mobile Menu Toggle Button */}
@@ -138,25 +209,64 @@ const Navbar = () => {
                     <Link href="/ideas" onClick={() => setIsOpen(false)} className={getMobileLinkClass("/ideas")}>
                         <FaLightbulb /> Ideas
                     </Link>
-                    <Link href="/add-idea" onClick={() => setIsOpen(false)} className={getMobileLinkClass("/add-idea")}>
-                        <FaPlusCircle /> Add Idea
-                    </Link>
-                    <Link href="/my-ideas" onClick={() => setIsOpen(false)} className={getMobileLinkClass("/my-ideas")}>
-                        <FaBookmark /> My Ideas
-                    </Link>
-                    <Link href="/interactions" onClick={() => setIsOpen(false)} className={getMobileLinkClass("/interactions")}>
-                        <FaCommentDots /> My Interactions
-                    </Link>
+                    {user && (
+                        <>
+                            <Link href="/add-idea" onClick={() => setIsOpen(false)} className={getMobileLinkClass("/add-idea")}>
+                                <FaPlusCircle /> Add Idea
+                            </Link>
+                            <Link href="/my-ideas" onClick={() => setIsOpen(false)} className={getMobileLinkClass("/my-ideas")}>
+                                <FaBookmark /> My Ideas
+                            </Link>
+                            <Link href="/interactions" onClick={() => setIsOpen(false)} className={getMobileLinkClass("/interactions")}>
+                                <FaCommentDots /> My Interactions
+                            </Link>
+                        </>
+                    )}
 
-                    <div className="pt-2 flex flex-col space-y-2">
-                        <Link href="/login" onClick={() => setIsOpen(false)} className="flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-800 w-full py-3 rounded-xl font-medium text-gray-700 dark:text-gray-300">
-                            <FaSignInAlt /> Login
-                        </Link>
+                    <div className="pt-2 flex flex-col space-y-2 border-t border-gray-100 dark:border-gray-800">
+                        {isPending ? (
+                            <div className="w-full h-12 bg-gray-200 dark:bg-gray-800 animate-pulse rounded-xl" />
+                        ) : user ? (
+                            <div className="flex flex-col space-y-3">
+                                <div className="flex items-center gap-3 p-2">
+                                    <img
+                                        src={user?.image || "/user.png"}
+                                        alt={user?.name}
+                                        className="w-10 h-10 rounded-full object-cover border-2 border-[#42D3F2]"
+                                    />
+                                    <div className="overflow-hidden">
+                                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{user?.name}</p>
+                                        <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{user?.email}</p>
+                                    </div>
+                                </div>
+                                <Link
+                                    href="/my-profile"
+                                    onClick={() => setIsOpen(false)}
+                                    className="flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-800 w-full py-3 rounded-xl font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900"
+                                >
+                                    <User size={16} /> My Profile
+                                </Link>
+                                <button
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        authClient.signOut();
+                                    }}
+                                    className="flex items-center justify-center gap-2 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 w-full py-3 rounded-xl font-medium hover:bg-red-100 dark:hover:bg-red-950/40 transition-colors"
+                                >
+                                    <LogOut size={16} /> Logout
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <Link href="/login" onClick={() => setIsOpen(false)} className="flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-800 w-full py-3 rounded-xl font-medium text-gray-700 dark:text-gray-300">
+                                    <FaSignInAlt /> Login
+                                </Link>
 
-                        {/* Mobile Register Button */}
-                        <Link href="/register" onClick={() => setIsOpen(false)} className="flex items-center justify-center gap-2 bg-emerald-600 text-white w-full py-3 rounded-xl font-medium shadow-sm">
-                            <FaUserPlus /> Register
-                        </Link>
+                                <Link href="/register" onClick={() => setIsOpen(false)} className="flex items-center justify-center gap-2 bg-emerald-600 text-white w-full py-3 rounded-xl font-medium shadow-sm">
+                                    <FaUserPlus /> Register
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             )}
