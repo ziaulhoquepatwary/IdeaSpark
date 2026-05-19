@@ -68,7 +68,18 @@ const Banner = () => {
 
     return (
         <section className="relative w-full bg-white dark:bg-[#0A0A0A] py-4 transition-colors duration-300 overflow-hidden">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-137.5 md:h-150 relative flex items-center justify-center">
+            <div className="absolute inset-0 pointer-events-none z-0">
+                <Image
+                    src="/bg-img-new.jpg"
+                    alt="Background"
+                    fill
+                    priority
+                    className="object-cover blur-none lg:blur-sm transition-all duration-300"
+                />
+                <div className="absolute inset-0 transition-colors duration-300" />
+            </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-137.5 md:h-150 relative flex items-center justify-center z-10">
 
                 <div className="absolute inset-0 opacity-40 dark:opacity-20 pointer-events-none">
                     <div className="absolute top-12 left-12 w-72 h-72 bg-emerald-400 dark:bg-emerald-300 rounded-full filter blur-[100px]" />
@@ -96,7 +107,7 @@ const Banner = () => {
                                 {slides[currentSlide].title}
                             </h1>
 
-                            <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                            <p className="text-base sm:text-lg text-gray-700 dark:text-gray-800 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
                                 {slides[currentSlide].desc}
                             </p>
 
