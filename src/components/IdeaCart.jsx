@@ -1,6 +1,12 @@
-import { ArrowUpRight, Lightbulb, Target, Users, Wallet } from "lucide-react"
+import { ArrowUpRight, Heart, Lightbulb, Target, Users, Wallet } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+
+function safeSlice(text, limit) {
+    if (!text) return ""
+    if (text.length <= limit) return text
+    return text.slice(0, limit) + "..."
+}
 
 function IdeaCart({ idea }) {
     return (
@@ -33,7 +39,7 @@ function IdeaCart({ idea }) {
                     </h3>
 
                     <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2">
-                        {idea.shortDesc.slice(0, 80)}...
+                        {safeSlice(idea.shortDesc, 80)}
                     </p>
 
                     <div className="grid grid-cols-1 gap-2.5 pt-2 border-t border-b border-gray-100 dark:border-gray-900/40 py-3 text-xs">
@@ -42,7 +48,7 @@ function IdeaCart({ idea }) {
                         <div className="flex gap-2 text-gray-700 dark:text-gray-300 relative overflow-hidden pr-4">
                             <Target className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
                             <span className="truncate">
-                                <strong>Problem:</strong> {idea.problem.slice(0, 45)}...
+                                <strong>Problem:</strong> {safeSlice(idea.problem, 45)}
                             </span>
                             <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-r from-transparent to-gray-50 dark:to-[#121212] pointer-events-none" />
                         </div>
@@ -51,7 +57,7 @@ function IdeaCart({ idea }) {
                         <div className="flex gap-2 text-gray-700 dark:text-gray-300 relative overflow-hidden pr-4">
                             <Lightbulb className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                             <span className="truncate">
-                                <strong>Solution:</strong> {idea.solution.slice(0, 45)}...
+                                <strong>Solution:</strong> {safeSlice(idea.solution, 45)}
                             </span>
                             <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-r from-transparent to-gray-50 dark:to-[#121212] pointer-events-none" />
                         </div>
@@ -75,7 +81,7 @@ function IdeaCart({ idea }) {
                     </div>
                 </div>
 
-                {/* Footer Tags & Details Button */}
+                {/* Footer Tags, Like Button & Details Button */}
                 <div className="flex items-center justify-between gap-2 pt-2">
                     <div className="flex flex-wrap gap-1.5 min-w-0">
                         {idea.tags?.slice(0, 2).map((tag, i) => (
@@ -85,13 +91,23 @@ function IdeaCart({ idea }) {
                         ))}
                     </div>
 
-                    <Link
-                        href={`/ideas/${idea.id}`}
-                        className="shrink-0 p-2.5 rounded-xl bg-emerald-600/10 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white dark:group-hover:bg-emerald-500 dark:group-hover:text-white transition-all duration-300"
-                        aria-label="View Detailed Description"
-                    >
-                        <ArrowUpRight className="w-4 h-4" />
-                    </Link>
+                    <div className="flex items-center gap-2 shrink-0">
+                        {/* Like Button — design only */}
+                        <button
+                            aria-label="Like this idea"
+                            className="p-2.5 rounded-xl bg-rose-500/10 text-orange-400 hover:text-orange-800 transition-all duration-300 cursor-pointer"
+                        >
+                            <Heart className="w-5 h-5" />
+                        </button>
+
+                        <Link
+                            href={`/ideas/${idea.id}`}
+                            className="p-2.5 rounded-xl bg-emerald-600/10 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white dark:group-hover:bg-emerald-500 dark:group-hover:text-white transition-all duration-300"
+                            aria-label="View Detailed Description"
+                        >
+                            <ArrowUpRight className="w-4 h-4" />
+                        </Link>
+                    </div>
                 </div>
 
             </div>

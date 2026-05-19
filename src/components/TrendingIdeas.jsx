@@ -80,7 +80,7 @@ const TrendingIdeas = () => {
     ];
 
     return (
-        <section className="w-full bg-white dark:bg-[#0A0A0A] py-16 md:py-24 text-gray-900 dark:text-white border-t border-b border-gray-100 dark:border-gray-900 transition-colors duration-300">
+        <section className="w-full bg-white dark:bg-[#0A0A0A] py-10 md:py-14 text-gray-900 dark:text-white border-t border-b border-gray-100 dark:border-gray-900 transition-colors duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 {/* Section Header */}
