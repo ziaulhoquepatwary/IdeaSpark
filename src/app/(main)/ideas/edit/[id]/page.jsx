@@ -4,8 +4,9 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Lightbulb, FileText, AlignLeft, Layers, Hash, Image as ImageIcon, Wallet, Users, Target, ShieldAlert, Loader2, ArrowLeft, RefreshCw } from "lucide-react";
+import Swal from "sweetalert2";
 
-const categories = ["Health", "SaaS", "FinTech", "Web3", "Logistics", "EdTech"];
+const categories = ["Tech", "Health", "AI", "Education", "Finance", "Environment", "Other"];
 
 export default function EditIdeaPage() {
     const params = useParams();
@@ -14,45 +15,84 @@ export default function EditIdeaPage() {
 
     const [ideaData, setIdeaData] = useState(null);
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors, isSubmitting }
-    } = useForm();
+    const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm();
 
     useEffect(() => {
         if (!id) return;
 
         const getExistingIdea = async () => {
             try {
-                await new Promise((resolve) => setTimeout(resolve, 800));
+                const res = await fetch(`http://localhost:5000/api/ideas/${id}`, {
+                    credentials: "include",
+                });
 
-                const mockData = {
-                    title: "MediConnect: AI-Driven Rural Health Diagnostics",
-                    category: "Health",
-                    shortDesc: "Providing instant healthcare reports via AI in remote areas.",
-                    detailedDesc: "A complete software and hardware ecosystem deployed via cloud architecture...",
-                    tags: "AI, Health, Tech",
-                    imageUrl: "https://images.unsplash.com/photo-1516549655169-df83a0774514",
-                    budget: "$15,000",
-                    targetAudience: "Rural Patients, Digital Health Sectors",
-                    problem: "Lacking medical experts in remote villages causes high mortality rates.",
-                    solution: "An offline-capable diagnostic node powered by an expert medical model."
-                };
+                const data = await res.json();
 
-                setIdeaData(mockData);
+                if (data.success) {
+                    const formattedIdea = {
+                        ...data.idea,
+                        tags: data.idea.tags?.join(", ") || "",
+                    };
+
+                    setIdeaData(formattedIdea);
+
+                    // form এ data inject
+                    reset(formattedIdea);
+                }
             } catch (err) {
-                console.error("Error fetching idea blueprints", err);
+                console.error("Error fetching idea", err);
             }
         };
 
         getExistingIdea();
-    }, [id]);
+    }, [id, reset]);
 
-    const onUpdateForm = async (data) => {
-        console.log(`🔄 Target Node ID: ${id} - Pushing Updated Data:`, data);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        router.push("/my-ideas");
+    const onUpdateForm = async (formData) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/ideas/${id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify(formData),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+
+                await Swal.fire({
+                    title: "Updated!",
+                    text: "Innovation node updated successfully.",
+                    icon: "success",
+                    confirmButtonColor: "#10b981",
+                    background: "#111111",
+                    color: "#ffffff",
+                });
+
+                router.push("/my-ideas");
+
+            } else {
+                Swal.fire({
+                    title: "Failed!",
+                    text: data.message || "Update failed.",
+                    icon: "error",
+                    confirmButtonColor: "#ef4444",
+                });
+            }
+
+        } catch (error) {
+
+            console.error("Update failed", error);
+
+            Swal.fire({
+                title: "Error!",
+                text: "Something went wrong.",
+                icon: "error",
+                confirmButtonColor: "#ef4444",
+            });
+        }
     };
 
     return (
@@ -118,16 +158,16 @@ export default function EditIdeaPage() {
                                         <FileText size={16} />
                                     </span>
                                     <input
-                                        {...register("shortDesc", { required: "Short description is required" })}
-                                        key={ideaData?.shortDesc || "desc-empty"}
-                                        defaultValue={ideaData?.shortDesc || ""}
+                                        {...register("shortDescription", { required: "Short description is required" })}
+                                        key={ideaData?.shortDescription || "desc-empty"}
+                                        defaultValue={ideaData?.shortDescription || ""}
                                         type="text"
                                         className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-400
-                                            ${errors.shortDesc ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-orange-500 focus:ring-orange-500/10"}`}
+                                            ${errors.shortDescription ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-orange-500 focus:ring-orange-500/10"}`}
                                         placeholder="A brief catchy one-liner of your concept..."
                                     />
                                 </div>
-                                {errors.shortDesc && <p className="text-red-500 text-xs font-medium pl-1">{errors.shortDesc.message}</p>}
+                                {errors.shortDescription && <p className="text-red-500 text-xs font-medium pl-1">{errors.shortDescription.message}</p>}
                             </div>
 
                             {/* Detailed Description */}
@@ -138,16 +178,16 @@ export default function EditIdeaPage() {
                                         <AlignLeft size={16} />
                                     </span>
                                     <textarea
-                                        {...register("detailedDesc", { required: "Detailed description is required" })}
-                                        key={ideaData?.detailedDesc || "detailed-empty"}
-                                        defaultValue={ideaData?.detailedDesc || ""}
+                                        {...register("detailedDescription", { required: "Detailed description is required" })}
+                                        key={ideaData?.detailedDescription || "detailed-empty"}
+                                        defaultValue={ideaData?.detailedDescription || ""}
                                         rows={4}
                                         className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-400 resize-none
-                                            ${errors.detailedDesc ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-orange-500 focus:ring-orange-500/10"}`}
+                                            ${errors.detailedDescription ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-orange-500 focus:ring-orange-500/10"}`}
                                         placeholder="Explain the full architectural scope..."
                                     />
                                 </div>
-                                {errors.detailedDesc && <p className="text-red-500 text-xs font-medium pl-1">{errors.detailedDesc.message}</p>}
+                                {errors.detailedDescription && <p className="text-red-500 text-xs font-medium pl-1">{errors.detailedDescription.message}</p>}
                             </div>
                         </div>
                     </div>
@@ -173,9 +213,10 @@ export default function EditIdeaPage() {
                                         className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all duration-200 text-gray-900 dark:text-white cursor-pointer appearance-none
                                             ${errors.category ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-orange-500 focus:ring-orange-500/10"}`}
                                     >
-                                        <option value="">Select Category</option>
-                                        {categories.map((cat) => (
-                                            <option key={cat} value={cat} className="bg-white dark:bg-[#111111]">{cat}</option>
+                                        {categories.map((cat, index) => (
+                                            <option key={`${cat}-${index}`} value={cat}>
+                                                {cat}
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
@@ -208,16 +249,16 @@ export default function EditIdeaPage() {
                                         <ImageIcon size={16} />
                                     </span>
                                     <input
-                                        {...register("imageUrl", { required: "Image link is required" })}
-                                        key={ideaData?.imageUrl || "image-empty"}
-                                        defaultValue={ideaData?.imageUrl || ""}
+                                        {...register("imageURL", { required: "Image link is required" })}
+                                        key={ideaData?.imageURL || "image-empty"}
+                                        defaultValue={ideaData?.imageURL || ""}
                                         type="text"
                                         className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-400
-                                            ${errors.imageUrl ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-orange-500 focus:ring-orange-500/10"}`}
+                                            ${errors.imageURL ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-orange-500 focus:ring-orange-500/10"}`}
                                         placeholder="Paste image absolute link path..."
                                     />
                                 </div>
-                                {errors.imageUrl && <p className="text-red-500 text-xs font-medium pl-1">{errors.imageUrl.message}</p>}
+                                {errors.imageURL && <p className="text-red-500 text-xs font-medium pl-1">{errors.imageURL.message}</p>}
                             </div>
 
                             {/* Estimated Budget */}
@@ -228,9 +269,9 @@ export default function EditIdeaPage() {
                                         <Wallet size={16} />
                                     </span>
                                     <input
-                                        {...register("budget")}
-                                        key={ideaData?.budget || "budget-empty"}
-                                        defaultValue={ideaData?.budget || ""}
+                                        {...register("estimatedBudget")}
+                                        key={ideaData?.estimatedBudget || "budget-empty"}
+                                        defaultValue={ideaData?.estimatedBudget || ""}
                                         type="text"
                                         className="w-full pl-10 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-gray-800 rounded-xl text-sm focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/10 transition-all text-gray-900 dark:text-white placeholder-gray-400"
                                         placeholder="e.g., $15,000"
@@ -275,16 +316,16 @@ export default function EditIdeaPage() {
                                         <Target size={16} />
                                     </span>
                                     <textarea
-                                        {...register("problem", { required: "Problem statement validation is required" })}
-                                        key={ideaData?.problem || "problem-empty"}
-                                        defaultValue={ideaData?.problem || ""}
+                                        {...register("problemStatement", { required: "Problem statement validation is required" })}
+                                        key={ideaData?.problemStatement || "problem-empty"}
+                                        defaultValue={ideaData?.problemStatement || ""}
                                         rows={3}
                                         className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-400 resize-none
-                                            ${errors.problem ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-orange-500 focus:ring-orange-500/10"}`}
+                                            ${errors.problemStatement ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-orange-500 focus:ring-orange-500/10"}`}
                                         placeholder="What critical crisis does this idea resolve?"
                                     />
                                 </div>
-                                {errors.problem && <p className="text-red-500 text-xs font-medium pl-1">{errors.problem.message}</p>}
+                                {errors.problemStatement && <p className="text-red-500 text-xs font-medium pl-1">{errors.problemStatement.message}</p>}
                             </div>
 
                             {/* Proposed Solution */}
@@ -295,16 +336,16 @@ export default function EditIdeaPage() {
                                         <Lightbulb size={16} />
                                     </span>
                                     <textarea
-                                        {...register("solution", { required: "Proposed solution details are required" })}
-                                        key={ideaData?.solution || "solution-empty"}
-                                        defaultValue={ideaData?.solution || ""}
+                                        {...register("proposedSolution", { required: "Proposed solution details are required" })}
+                                        key={ideaData?.proposedSolution || "solution-empty"}
+                                        defaultValue={ideaData?.proposedSolution || ""}
                                         rows={3}
                                         className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-400 resize-none
-                                            ${errors.solution ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-orange-500 focus:ring-orange-500/10"}`}
+                                            ${errors.proposedSolution ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-orange-500 focus:ring-orange-500/10"}`}
                                         placeholder="How does your architecture feature mitigate the problem?"
                                     />
                                 </div>
-                                {errors.solution && <p className="text-red-500 text-xs font-medium pl-1">{errors.solution.message}</p>}
+                                {errors.proposedSolution && <p className="text-red-500 text-xs font-medium pl-1">{errors.proposedSolution.message}</p>}
                             </div>
                         </div>
                     </div>
