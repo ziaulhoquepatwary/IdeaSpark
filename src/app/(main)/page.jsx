@@ -2,6 +2,7 @@
 import { Suspense, lazy } from "react";
 import dynamic from "next/dynamic";
 import Banner from "@/components/Banner"
+import HowItWorksSection from "@/components/HowItWorksSection";
 
 // Above-the-fold: Immediate render
 // Below-the-fold: Lazy load with Suspense
@@ -32,6 +33,9 @@ function Home() {
             </Suspense>
             <Suspense fallback={<div className="h-80 bg-gray-50 dark:bg-gray-900" />}>
                 <WhyUsSection />
+            </Suspense>
+            <Suspense fallback={<div className="h-80 bg-gray-50 dark:bg-gray-900" />}>
+                <HowItWorksSection />
             </Suspense>
         </>
     )

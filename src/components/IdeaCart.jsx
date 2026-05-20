@@ -22,6 +22,7 @@ function IdeaCart({ idea }) {
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                     sizes="(max-w-768px) 100vw, (max-w-1024px) 50vw, 33vw"
+                    suppressHydrationWarning
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-950/80 via-transparent to-transparent opacity-90" />
 

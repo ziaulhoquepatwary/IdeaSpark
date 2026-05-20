@@ -75,6 +75,7 @@ const Banner = () => {
                     fill
                     priority
                     className="object-cover blur-none lg:blur-sm transition-all duration-300"
+                    suppressHydrationWarning
                 />
                 <div className="absolute inset-0 transition-colors duration-300" />
             </div>
@@ -134,6 +135,7 @@ const Banner = () => {
                                     priority
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                                     sizes="(max-w-1024px) 100vw, 40vw"
+                                    suppressHydrationWarning
                                 />
                             </div>
                         </div>

@@ -57,11 +57,12 @@ const WhyUsSection = () => {
                         {/* 1st Image Card with pure Tailwind Hover Animation */}
                         <div className="relative w-full h-[90%] rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-900 shadow-xl bg-gray-50 dark:bg-zinc-900 group transition-all duration-500 hover:-translate-y-2">
                             <Image
-                                src="/banner1.jpg"
+                                src="/about-1.jpg"
                                 alt="Innovation and Collaboration"
                                 fill
                                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                                 sizes="(max-w-1024px) 50vw, 25vw"
+                                suppressHydrationWarning
                             />
                             {/* Gradient overlay: Bottom colorized, top clean */}
                             <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/80 via-emerald-950/20 to-transparent opacity-80 dark:opacity-90 pointer-events-none transition-opacity duration-500 group-hover:opacity-95" />
@@ -70,11 +71,12 @@ const WhyUsSection = () => {
                         {/* 2nd Image Card (Asymmetric Layout with top margin) */}
                         <div className="relative w-full h-[90%] mt-8 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-900 shadow-xl bg-gray-50 dark:bg-zinc-900 group transition-all duration-500 hover:-translate-y-2">
                             <Image
-                                src="/banner3.jpg"
+                                src="/about-2.jpg"
                                 alt="Startup Validation"
                                 fill
                                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                                 sizes="(max-w-1024px) 50vw, 25vw"
+                                suppressHydrationWarning
                             />
                             {/* Gradient overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-orange-950/80 via-orange-950/20 to-transparent opacity-80 dark:opacity-90 pointer-events-none transition-opacity duration-500 group-hover:opacity-95" />
