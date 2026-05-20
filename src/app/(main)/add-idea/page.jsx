@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Lightbulb, FileText, AlignLeft, Layers, Hash, Image as ImageIcon, Wallet, Users, Target, ShieldAlert, Plus, Loader2 } from "lucide-react";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 function AddIdea() {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -12,15 +14,62 @@ function AddIdea() {
     const onSubmitForm = async (data) => {
         setIsSubmitting(true);
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        try {
+            // Create clean payload
+            const formattedData = {
+                ...data,
 
-        console.log("🚀 Form Data Submitted Successfully:", data);
+                tags:
+                    typeof data.tags === "string"
+                        ? data.tags
+                            .split(",")
+                            .map((tag) => tag.trim())
+                            .filter(Boolean)
+                        : data.tags,
+            };
 
-        reset();
-        setIsSubmitting(false);
+            const res = await axios.post(
+                "http://localhost:5000/api/ideas",
+                formattedData,
+                {
+                    withCredentials: true,
+                }
+            );
+
+            await Swal.fire({
+                icon: "success",
+                title: "Idea Published 🚀",
+                text: res.data?.message || "Your idea was submitted successfully.",
+                background: "#0A0A0A",
+                color: "#ffffff",
+                confirmButtonColor: "#10b981",
+                timer: 2200,
+                showConfirmButton: false,
+            });
+
+            reset();
+
+        } catch (error) {
+
+            const message =
+                error?.response?.data?.message ||
+                "Something went wrong!";
+
+            Swal.fire({
+                icon: "error",
+                title: "Submission Failed",
+                text: message,
+                background: "#0A0A0A",
+                color: "#ffffff",
+                confirmButtonColor: "#ef4444",
+            });
+
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const categories = ["Tech", "Health", "AI", "Education", "FinTech", "AgriTech"];
+    const categories = ["Tech", "Health", "AI", "Education", "Finance", "Environment", "Other"];
 
     return (
         <section className="min-h-screen bg-white dark:bg-[#0A0A0A] py-12 px-4 sm:px-6 lg:px-8 text-gray-900 dark:text-white transition-colors duration-300 relative overflow-hidden">
@@ -82,14 +131,14 @@ function AddIdea() {
                                         <FileText size={16} />
                                     </span>
                                     <input
-                                        {...register("shortDesc", { required: "Short description is required" })}
+                                        {...register("shortDescription", { required: "Short description is required" })}
                                         type="text"
                                         className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-400
-                                            ${errors.shortDesc ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-emerald-500 focus:ring-emerald-500/10"}`}
+                                            ${errors.shortDescription ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-emerald-500 focus:ring-emerald-500/10"}`}
                                         placeholder="A brief catchy one-liner of your startup concept..."
                                     />
                                 </div>
-                                {errors.shortDesc && <p className="text-red-500 text-xs font-medium pl-1">{errors.shortDesc.message}</p>}
+                                {errors.shortDescription && <p className="text-red-500 text-xs font-medium pl-1">{errors.shortDescription.message}</p>}
                             </div>
 
                             {/* Detailed Description */}
@@ -100,14 +149,14 @@ function AddIdea() {
                                         <AlignLeft size={16} />
                                     </span>
                                     <textarea
-                                        {...register("detailedDesc", { required: "Detailed description is required" })}
+                                        {...register("detailedDescription", { required: "Detailed description is required" })}
                                         rows="4"
                                         className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-400 resize-none
-                                            ${errors.detailedDesc ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-emerald-500 focus:ring-emerald-500/10"}`}
+                                            ${errors.detailedDescription ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-emerald-500 focus:ring-emerald-500/10"}`}
                                         placeholder="Explain the full architectural scope, framework mechanics, and target vision..."
                                     />
                                 </div>
-                                {errors.detailedDesc && <p className="text-red-500 text-xs font-medium pl-1">{errors.detailedDesc.message}</p>}
+                                {errors.detailedDescription && <p className="text-red-500 text-xs font-medium pl-1">{errors.detailedDescription.message}</p>}
                             </div>
                         </div>
                     </div>
@@ -164,14 +213,14 @@ function AddIdea() {
                                         <ImageIcon size={16} />
                                     </span>
                                     <input
-                                        {...register("imageUrl", { required: "Image link is required" })}
+                                        {...register("imageURL", { required: "Image link is required" })}
                                         type="text"
                                         className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-400
-                                            ${errors.imageUrl ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-emerald-500 focus:ring-emerald-500/10"}`}
+                                            ${errors.imageURL ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-emerald-500 focus:ring-emerald-500/10"}`}
                                         placeholder="Paste image absolute hotlink path..."
                                     />
                                 </div>
-                                {errors.imageUrl && <p className="text-red-500 text-xs font-medium pl-1">{errors.imageUrl.message}</p>}
+                                {errors.imageURL && <p className="text-red-500 text-xs font-medium pl-1">{errors.imageURL.message}</p>}
                             </div>
 
                             {/* Estimated Budget (Optional) */}
@@ -182,7 +231,7 @@ function AddIdea() {
                                         <Wallet size={16} />
                                     </span>
                                     <input
-                                        {...register("budget")}
+                                        {...register("estimatedBudget")}
                                         type="text"
                                         className="w-full pl-10 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-gray-800 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all text-gray-900 dark:text-white placeholder-gray-400"
                                         placeholder="e.g., $15,000"
@@ -225,17 +274,17 @@ function AddIdea() {
                                         <Target size={16} />
                                     </span>
                                     <textarea
-                                        {...register("problem", { required: "Problem statement validation is required" })}
+                                        {...register("problemStatement", { required: "Problem statement validation is required" })}
                                         rows="3"
                                         className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-400 resize-none
-                                            ${errors.problem ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-emerald-500 focus:ring-emerald-500/10"}`}
-                                        placeholder="What critical market crisis or painful problem does this idea resolve?"
+                                            ${errors.problemStatement ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-emerald-500 focus:ring-emerald-500/10"}`}
+                                        placeholder="What critical market crisis or painful problemStatement does this idea resolve?"
                                     />
                                 </div>
-                                {errors.problem && <p className="text-red-500 text-xs font-medium pl-1">{errors.problem.message}</p>}
+                                {errors.problemStatement && <p className="text-red-500 text-xs font-medium pl-1">{errors.problemStatement.message}</p>}
                             </div>
 
-                            {/* Proposed Solution */}
+                            {/* Proposed dSolution */}
                             <div className="space-y-1.5 md:col-span-2">
                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 block">Proposed Solution *</label>
                                 <div className="relative">
@@ -243,14 +292,14 @@ function AddIdea() {
                                         <Lightbulb size={16} />
                                     </span>
                                     <textarea
-                                        {...register("solution", { required: "Proposed solution details are required" })}
+                                        {...register("proposedSolution", { required: "Proposed Solution details are required" })}
                                         rows="3"
                                         className={`w-full pl-10 pr-4 py-3 bg-white dark:bg-[#0A0A0A] border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-400 resize-none
-                                            ${errors.solution ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-emerald-500 focus:ring-emerald-500/10"}`}
-                                        placeholder="How does your architecture feature mitigate the above-mentioned problem statement?"
+                                            ${errors.proposedSolution ? "border-red-500 focus:ring-red-500/10" : "border-gray-200 dark:border-gray-800 focus:border-emerald-500 focus:ring-emerald-500/10"}`}
+                                        placeholder="How does your architecture feature mitigate the above-mentioned problemStatement statement?"
                                     />
                                 </div>
-                                {errors.solution && <p className="text-red-500 text-xs font-medium pl-1">{errors.solution.message}</p>}
+                                {errors.proposedSolution && <p className="text-red-500 text-xs font-medium pl-1">{errors.proposedSolution.message}</p>}
                             </div>
                         </div>
                     </div>
