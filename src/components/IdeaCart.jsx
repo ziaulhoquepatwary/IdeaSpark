@@ -17,7 +17,7 @@ function IdeaCart({ idea }) {
             {/* Card Image Block */}
             <div className="relative h-48 w-full overflow-hidden bg-gray-200 dark:bg-zinc-800">
                 <Image
-                    src={idea.imageUrl}
+                    src={idea.imageURL}
                     alt={idea.title}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -39,7 +39,7 @@ function IdeaCart({ idea }) {
                     </h3>
 
                     <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2">
-                        {safeSlice(idea.shortDesc, 80)}
+                        {safeSlice(idea.shortDescription, 80)}
                     </p>
 
                     <div className="grid grid-cols-1 gap-2.5 pt-2 border-t border-b border-gray-100 dark:border-gray-900/40 py-3 text-xs">
@@ -48,7 +48,7 @@ function IdeaCart({ idea }) {
                         <div className="flex gap-2 text-gray-700 dark:text-gray-300 relative overflow-hidden pr-4">
                             <Target className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
                             <span className="truncate">
-                                <strong>Problem:</strong> {safeSlice(idea.problem, 45)}
+                                <strong>Problem:</strong> {safeSlice(idea.problemStatement, 45)}
                             </span>
                             <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-r from-transparent to-gray-50 dark:to-[#121212] pointer-events-none" />
                         </div>
@@ -57,7 +57,7 @@ function IdeaCart({ idea }) {
                         <div className="flex gap-2 text-gray-700 dark:text-gray-300 relative overflow-hidden pr-4">
                             <Lightbulb className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                             <span className="truncate">
-                                <strong>Solution:</strong> {safeSlice(idea.solution, 45)}
+                                <strong>Solution:</strong> {safeSlice(idea.proposedSolution, 45)}
                             </span>
                             <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-r from-transparent to-gray-50 dark:to-[#121212] pointer-events-none" />
                         </div>
@@ -71,7 +71,7 @@ function IdeaCart({ idea }) {
                         <span className="text-gray-400 flex items-center gap-1 uppercase font-semibold text-[10px] tracking-wider">
                             <Wallet className="w-3 h-3 text-gray-400" /> Est. Budget
                         </span>
-                        <span className="font-bold text-gray-900 dark:text-gray-200">{idea.budget}</span>
+                        <span className="font-bold text-gray-900 dark:text-gray-200">{idea.estimatedBudget || "N/A"}</span>
                     </div>
                     <div className="space-y-0.5 min-w-0">
                         <span className="text-gray-400 flex items-center gap-1 uppercase font-semibold text-[10px] tracking-wider">
@@ -101,7 +101,7 @@ function IdeaCart({ idea }) {
                         </button>
 
                         <Link
-                            href={`/ideas/${idea.id}`}
+                            href={`/ideas/${idea._id}`}
                             className="p-2.5 rounded-xl bg-emerald-600/10 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white dark:group-hover:bg-emerald-500 dark:group-hover:text-white transition-all duration-300"
                             aria-label="View Detailed Description"
                         >
