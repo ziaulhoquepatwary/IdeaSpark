@@ -1,6 +1,10 @@
+"use client"
+import { authClient } from "@/lib/auth-client"
 import { ArrowUpRight, Heart, Lightbulb, Target, Users, Wallet } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 function safeSlice(text, limit) {
     if (!text) return ""
@@ -9,6 +13,20 @@ function safeSlice(text, limit) {
 }
 
 function IdeaCart({ idea }) {
+    const router = useRouter();
+    const { data: session } = authClient.useSession();
+    const [liked, setLiked] = useState(false);
+
+
+    const handleLike = () => {
+        if (!session) {
+            router.push("/login");
+            return;
+        }
+        setLiked(!liked);
+    };
+
+
     return (
         <div
             className="group relative flex flex-col bg-gray-50 dark:bg-[#111111]/40 border border-gray-100 dark:border-gray-900/60 rounded-3xl overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-600/5 dark:hover:shadow-emerald-500/5 hover:border-gray-200 dark:hover:border-emerald-500/20"
@@ -95,10 +113,14 @@ function IdeaCart({ idea }) {
                     <div className="flex items-center gap-2 shrink-0">
                         {/* Like Button — design only */}
                         <button
+                            onClick={handleLike}
                             aria-label="Like this idea"
-                            className="p-2.5 rounded-xl bg-rose-500/10 text-orange-400 hover:text-orange-800 transition-all duration-300 cursor-pointer"
+                            className={`p-2.5 rounded-xl transition-all duration-300 cursor-pointer ${liked
+                                    ? "bg-red-500/20 text-red-500"
+                                    : "bg-rose-500/10 text-orange-400 hover:text-orange-800"
+                                }`}
                         >
-                            <Heart className="w-5 h-5" />
+                            <Heart className="w-5 h-5" fill={liked ? "currentColor" : "none"} />
                         </button>
 
                         <Link

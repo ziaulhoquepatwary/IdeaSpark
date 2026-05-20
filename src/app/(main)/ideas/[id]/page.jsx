@@ -1,31 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
-    ArrowLeft, Heart, MessageSquare, Wallet, Users,
-    Target, Lightbulb, Send, Edit2, Trash2, ShieldAlert, Clock
+    Heart, MessageSquare, Wallet, Users,
+    Target, Lightbulb, Send, Loader2, AlertCircle,
+    Clock,
+    Edit2Icon,
+    Trash2
 } from "lucide-react";
+import axios from "axios";
+import Loading from "@/app/loading";
+import { authClient } from "@/lib/auth-client";
 
 const IdeaDetailsPage = () => {
     const { id } = useParams();
+    const router = useRouter();
+
+    const [idea, setIdea] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [liked, setLiked] = useState(false);
 
-    const idea = {
-        id: id || "idea-1",
-        title: "MediConnect: AI-Driven Rural Health Diagnostics",
-        shortDesc: "Bridging the gap between rural clinics and expert doctors using lightweight AI diagnostic tools.",
-        category: "Health",
-        tags: ["Telehealth", "AI", "RuralCare"],
-        imageUrl: "/banner1.jpg",
-        budget: "$15,000",
-        reaction: 120,
-        targetAudience: "Rural patients",
-        problem: "Lack of specialized doctors in remote villages leads to delayed and incorrect treatments. Patients often have to travel hundreds of miles just for a basic consultation, wasting critical time and money.",
-        solution: "An offline-first AI tablet app that performs preliminary diagnostics, scans medical reports, and syncs data with city specialists as soon as a network is available."
-    };
+    const { data: session } = authClient.useSession();
 
     const [demoComments, setDemoComments] = useState([
         {
@@ -44,6 +42,52 @@ const IdeaDetailsPage = () => {
         }
     ]);
 
+    // Login check
+    useEffect(() => {
+        if (session === null) {
+            router.push("/login");
+        }
+    }, [session, router]);
+
+    // 📡 Fetch idea
+    useEffect(() => {
+        if (!session) return;
+
+        const fetchIdea = async () => {
+            try {
+                setLoading(true);
+                const res = await axios.get(
+                    `http://localhost:5000/api/ideas/${id}`,
+                    { withCredentials: true }
+                );
+                setIdea(res.data.idea);
+            } catch (err) {
+                setError(err.response?.data?.message || "Failed to load idea.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchIdea();
+    }, [id, session]);
+
+    // Loading State
+    if (loading) {
+        return <Loading />;
+    }
+
+    // Error State
+    if (error) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-white dark:bg-[#0A0A0A] gap-3 text-red-500">
+                <AlertCircle size={36} />
+                <p className="text-sm font-semibold">{error}</p>
+            </div>
+        );
+    }
+
+    if (!idea) return null;
+
     return (
         <section className="min-h-screen bg-white dark:bg-[#0A0A0A] py-12 px-4 sm:px-6 lg:px-8 text-gray-900 dark:text-white transition-colors duration-300">
             <div className="max-w-4xl mx-auto space-y-8">
@@ -53,35 +97,31 @@ const IdeaDetailsPage = () => {
                     <div className="absolute bottom-12 right-15 w-72 h-72 bg-orange-400 dark:bg-orange-300 rounded-full filter blur-[100px]" />
                 </div>
 
-                {/* 2. Hero Image Banner Section */}
+                {/* Hero Image */}
                 <div className="relative h-64 sm:h-96 w-full overflow-hidden rounded-3xl border border-gray-100 dark:border-gray-900 shadow-lg bg-gray-100 dark:bg-zinc-900">
                     <Image
-                        src={idea.imageUrl}
+                        src={idea.imageURL}
                         alt={idea.title}
                         fill
                         className="object-cover"
                         priority
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/40 to-transparent" />
-
-                    {/* Floating Category Tag */}
                     <span className="absolute top-4 left-4 bg-emerald-600 text-white text-xs font-extrabold px-3 py-1.5 rounded-xl shadow-md uppercase tracking-wider">
                         {idea.category}
                     </span>
                 </div>
 
-                {/* 3. Title & Base Information */}
+                {/* Title & Info */}
                 <div className="space-y-4">
                     <h1 className="text-3xl sm:text-4xl font-black font-heading tracking-tight text-gray-950 dark:text-white leading-tight">
                         {idea.title}
                     </h1>
                     <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 leading-relaxed font-medium">
-                        {idea.shortDesc}
+                        {idea.shortDescription}
                     </p>
-
-                    {/* Tags Array */}
                     <div className="flex flex-wrap gap-2 pt-1">
-                        {idea.tags.map((tag, i) => (
+                        {idea.tags?.map((tag, i) => (
                             <span key={i} className="text-xs font-semibold px-3 py-1 bg-gray-100 dark:bg-zinc-900/60 text-gray-600 dark:text-gray-400 rounded-xl border border-gray-200/20">
                                 #{tag}
                             </span>
@@ -89,20 +129,18 @@ const IdeaDetailsPage = () => {
                     </div>
                 </div>
 
-                {/* 4. Core Metrics Breakdown (Grid Layout) */}
+                {/* Metrics */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {/* A. Estimated Budget */}
                     <div className="flex items-center gap-4 bg-gray-50 dark:bg-[#111111]/40 border border-gray-100 dark:border-gray-900/50 p-4 rounded-2xl">
                         <div className="p-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl">
                             <Wallet size={20} />
                         </div>
                         <div>
                             <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 block">Est. Budget</span>
-                            <span className="font-extrabold text-gray-950 dark:text-gray-200">{idea.budget}</span>
+                            <span className="font-extrabold text-gray-950 dark:text-gray-200">{idea.estimatedBudget || "N/A"}</span>
                         </div>
                     </div>
 
-                    {/* B. Target Audience */}
                     <div className="flex items-center gap-4 bg-gray-50 dark:bg-[#111111]/40 border border-gray-100 dark:border-gray-900/50 p-4 rounded-2xl">
                         <div className="p-3 bg-orange-500/10 text-orange-600 dark:text-orange-400 rounded-xl">
                             <Users size={20} />
@@ -113,7 +151,6 @@ const IdeaDetailsPage = () => {
                         </div>
                     </div>
 
-                    {/* C. Reactions/Interactions */}
                     <div className="flex items-center gap-4 bg-gray-50 dark:bg-[#111111]/40 border border-gray-100 dark:border-gray-900/50 p-4 rounded-2xl">
                         <button
                             onClick={() => setLiked(!liked)}
@@ -123,14 +160,18 @@ const IdeaDetailsPage = () => {
                         </button>
                         <div>
                             <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400 block">Appreciation</span>
-                            <span className="font-extrabold text-gray-950 dark:text-gray-200">{liked ? idea.reaction + 1 : idea.reaction} likes</span>
+                            <span className="font-extrabold text-gray-950 dark:text-gray-200">
+                                {liked
+                                    ? (idea.likes?.length || 0) + 1
+                                    : (idea.likes?.length || 0)
+                                } likes
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                {/* 5. Deep Dive: Problem & Solution Details */}
+                {/* Problem & Solution */}
                 <div className="space-y-6 pt-2">
-                    {/* Problem Statement Card */}
                     <div className="bg-orange-50/30 dark:bg-orange-950/10 border border-orange-200/20 dark:border-orange-900/20 p-6 rounded-3xl space-y-3 relative overflow-hidden">
                         <div className="absolute right-4 top-4 opacity-5 text-orange-500 pointer-events-none">
                             <Target size={120} />
@@ -139,11 +180,10 @@ const IdeaDetailsPage = () => {
                             <Target size={18} /> The Identified Problem
                         </h3>
                         <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
-                            {idea.problem}
+                            {idea.problemStatement}
                         </p>
                     </div>
 
-                    {/* Proposed Solution Card */}
                     <div className="bg-emerald-50/30 dark:bg-emerald-950/10 border border-emerald-200/20 dark:border-emerald-900/20 p-6 rounded-3xl space-y-3 relative overflow-hidden">
                         <div className="absolute right-4 top-4 opacity-5 text-emerald-500 pointer-events-none">
                             <Lightbulb size={120} />
@@ -152,7 +192,7 @@ const IdeaDetailsPage = () => {
                             <Lightbulb size={18} /> Proposed Architecture Solution
                         </h3>
                         <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
-                            {idea.solution}
+                            {idea.proposedSolution}
                         </p>
                     </div>
                 </div>
@@ -215,7 +255,7 @@ const IdeaDetailsPage = () => {
                                                     className="p-1.5 rounded-lg text-gray-400 hover:text-emerald-500 hover:bg-emerald-500/10 transition-colors cursor-pointer"
                                                     title="Edit Comment"
                                                 >
-                                                    <Edit2 size={12} />
+                                                    <Edit2Icon size={12} />
                                                 </button>
                                                 {/* Delete Button Option */}
                                                 <button
