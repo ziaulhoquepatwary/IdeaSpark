@@ -1,83 +1,11 @@
 import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowUpRight, Lightbulb, Wallet, Users, Target, Activity } from 'lucide-react';
+import { ArrowUpRight, Activity } from 'lucide-react';
 import IdeaCart from './IdeaCart';
+import fetchTrendingIdeas from '@/app/utils/fetchTrendingIdeas';
 
-const TrendingIdeas = () => {
-    const ideas = [
-        {
-            id: "idea-1",
-            title: "MediConnect: AI-Driven Rural Health Diagnostics",
-            shortDesc: "Bridging the gap between rural clinics and expert doctors using lightweight AI diagnostic tools.",
-            category: "Health",
-            tags: ["Telehealth", "AI", "RuralCare"],
-            imageUrl: "/banner1.jpg",
-            budget: "$15,000",
-            targetAudience: "Rural patients",
-            problem: "Lack of specialized doctors in remote villages leads to delayed and incorrect treatments.",
-            solution: "An offline-first AI tablet app that performs preliminary diagnostics and syncs with city specialists."
-        },
-        {
-            id: "idea-2",
-            title: "EduSphere: Decentralized Peer Learning",
-            shortDesc: "A blockchain-powered learning ecosystem where students teach and earn secure micro-incentives.",
-            category: "Education",
-            tags: ["Web3", "EdTech", "P2P"],
-            imageUrl: "/banner2.jpg",
-            budget: "$8,500",
-            targetAudience: "University students",
-            problem: "Traditional online courses have a 90% drop-out rate due to a lack of motivation and interaction.",
-            solution: "A gamified, peer-to-peer micro-learning network incentivized through community-backed tokens."
-        },
-        {
-            id: "idea-3",
-            title: "EcoRoute: Green Logistics Router",
-            shortDesc: "An enterprise API reducing fleet carbon footprints through real-time traffic and eco-data analysis.",
-            category: "Tech",
-            tags: ["SaaS", "GreenTech", "Logistics"],
-            imageUrl: "/banner3.jpg",
-            budget: "$22,000",
-            targetAudience: "E-commerce giants",
-            problem: "Inefficient route mapping causes millions of tons of excess CO2 emissions in urban deliveries.",
-            solution: "An advanced machine-learning algorithm that predicts emission-heavy zones and reroutes fleets dynamically."
-        },
-        {
-            id: "idea-4",
-            title: "ScribeAI: Automated Legal Document Auditor",
-            shortDesc: "Instantly audit complex corporate contracts for hidden risks and compliance flaws using LLMs.",
-            category: "AI",
-            tags: ["LegalTech", "LLM", "B2B"],
-            imageUrl: "/banner1.jpg",
-            budget: "$12,000",
-            targetAudience: "Startup founders",
-            problem: "Hiring lawyers for initial document vetting is prohibitively expensive for early-stage companies.",
-            solution: "A finely-tuned AI model trained on regional corporate laws that highlights risk parameters in seconds."
-        },
-        {
-            id: "idea-5",
-            title: "AquaMonitor: IoT Smart FinTech Farming",
-            shortDesc: "IoT water sensors combined with micro-credit scoring for small-scale shrimp farmers.",
-            category: "Tech",
-            tags: ["IoT", "AgriTech", "FinTech"],
-            imageUrl: "/banner2.jpg",
-            budget: "$18,500",
-            targetAudience: "Aquaculture farmers",
-            problem: "Sudden water contamination ruins entire harvests, making farmers high-risk for traditional bank loans.",
-            solution: "IoT sensors track water pH/oxygen, alerting farmers and generating a trust score for instant bank credits."
-        },
-        {
-            id: "idea-6",
-            title: "MindBuddy: Corporate Burnout Preventer",
-            shortDesc: "An anonymous slack integration tracking mental health trends through semantic analysis.",
-            category: "Health",
-            tags: ["HR-Tech", "AI", "Wellness"],
-            imageUrl: "/banner3.jpg",
-            budget: "$6,000",
-            targetAudience: "HR heads",
-            problem: "High employee turnover caused by silent workplace burnout that companies fail to detect early.",
-            solution: "An AI slack-bot that safely reviews public channels' sentiment to give HRs real-time aggregated team mood data."
-        }
-    ];
+const TrendingIdeas = async () => {
+
+    const ideas = await fetchTrendingIdeas();
 
     return (
         <section className="w-full bg-white dark:bg-[#0A0A0A] py-10 md:py-14 text-gray-900 dark:text-white border-t border-b border-gray-100 dark:border-gray-900 transition-colors duration-300">
@@ -98,10 +26,10 @@ const TrendingIdeas = () => {
                     </Link>
                 </div>
 
-                {/* Grid Layout */}
+                {/* Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
                     {ideas.map((idea) => (
-                        <IdeaCart key={idea.id} idea={idea} />
+                        <IdeaCart key={idea._id} idea={idea} />
                     ))}
                 </div>
 
