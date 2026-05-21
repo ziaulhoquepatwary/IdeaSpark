@@ -9,23 +9,6 @@ const db = client.db();
 export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
-        requireEmailVerification: true,
-
-        async sendResetPassword({ user, url }) {
-            await sendEmail({
-                to: user.email,
-                subject: "Reset Your Password",
-                text: `Click the link below to reset your password:\n\n${url}`,
-            });
-        },
-
-        onExistingUserSignUp: async ({ user }) => {
-            await sendEmail({
-                to: user.email,
-                subject: "Sign-up attempt with your email",
-                text: "Someone tried to create an account using your email address.",
-            });
-        },
     },
 
     socialProviders: {

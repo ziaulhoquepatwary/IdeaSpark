@@ -50,7 +50,6 @@ function Register() {
     const handleGoogleLogin = async () => {
         await authClient.signIn.social({
             provider: "google",
-            callbackURL: `${process.env.NEXT_PUBLIC_APP_URL}${getRedirectUrl()}`
         });
     };
 
