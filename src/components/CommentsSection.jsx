@@ -2,23 +2,24 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useSession } from "@/lib/auth-client"; // Better Auth
+import { authClient } from "@/lib/auth-client"; // Better Auth
 import { MessageSquare, Send, Pencil, Trash2, Loader2, X, Check } from "lucide-react";
 import Swal from "sweetalert2";
+import Image from "next/image";
 
 axios.defaults.withCredentials = true;
 
 const API = "http://localhost:5000";
 
 export default function CommentsSection({ ideaId }) {
-    const { data: session } = useSession(); 
+    const { data: session } = authClient.useSession();
     const currentUser = session?.user;
 
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [newComment, setNewComment] = useState("");
     const [submitting, setSubmitting] = useState(false);
-    const [editingId, setEditingId] = useState(null); 
+    const [editingId, setEditingId] = useState(null);
     const [editContent, setEditContent] = useState("");
     const [editSubmitting, setEditSubmitting] = useState(false);
 
@@ -26,7 +27,7 @@ export default function CommentsSection({ ideaId }) {
     const fetchComments = async () => {
         try {
             const res = await axios.get(`${API}/api/comments/${ideaId}`);
-            setComments(res.data.comments);
+            setComments(res.data.comments || []);
         } catch (error) {
             console.error("Failed to fetch comments", error);
         } finally {
@@ -48,14 +49,25 @@ export default function CommentsSection({ ideaId }) {
                 content: newComment.trim(),
             });
 
-            // new comment list add without refetching
             setComments((prev) => [res.data.comment, ...prev]);
             setNewComment("");
+
+            Swal.fire({
+                title: "Success!",
+                text: "Your comment has been posted.",
+                icon: "success",
+                target: 'body',
+                timer: 1500,
+                showConfirmButton: false,
+                background: "#111111",
+                color: "#ffffff",
+            });
         } catch (error) {
             Swal.fire({
                 title: "Failed!",
                 text: error.response?.data?.message || "Could not post comment.",
                 icon: "error",
+                target: 'body',
                 confirmButtonColor: "#ef4444",
                 background: "#111111",
                 color: "#ffffff",
@@ -91,11 +103,23 @@ export default function CommentsSection({ ideaId }) {
                 prev.map((c) => (c._id === commentId ? res.data.comment : c))
             );
             cancelEdit();
+
+            Swal.fire({
+                title: "Updated!",
+                text: "Your comment has been updated.",
+                icon: "success",
+                target: 'body',
+                timer: 1500,
+                showConfirmButton: false,
+                background: "#111111",
+                color: "#ffffff",
+            });
         } catch (error) {
             Swal.fire({
                 title: "Failed!",
                 text: error.response?.data?.message || "Could not update comment.",
                 icon: "error",
+                target: 'body',
                 confirmButtonColor: "#ef4444",
                 background: "#111111",
                 color: "#ffffff",
@@ -105,40 +129,52 @@ export default function CommentsSection({ ideaId }) {
         }
     };
 
-    // Delete
+    // Delete comment with confirmation
     const handleDelete = async (commentId) => {
-        const result = await Swal.fire({
-            title: "Delete Comment?",
-            text: "This action cannot be undone.",
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
             icon: "warning",
             showCancelButton: true,
+            target: 'body',
             confirmButtonColor: "#ef4444",
             cancelButtonColor: "#374151",
-            confirmButtonText: "Yes, delete it",
+            confirmButtonText: "Yes, delete it!",
             background: "#111111",
             color: "#ffffff",
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    await axios.delete(`${API}/api/comments/${commentId}`);
+                    setComments((prev) => prev.filter((c) => c._id !== commentId));
+
+                    Swal.fire({
+                        title: "Deleted!",
+                        text: "Your comment has been deleted.",
+                        icon: "success",
+                        target: 'body',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        background: "#111111",
+                        color: "#ffffff",
+                    });
+                } catch (error) {
+                    Swal.fire({
+                        title: "Failed!",
+                        text: error.response?.data?.message || "Could not delete comment.",
+                        icon: "error",
+                        target: 'body',
+                        confirmButtonColor: "#ef4444",
+                        background: "#111111",
+                        color: "#ffffff",
+                    });
+                }
+            }
         });
-
-        if (!result.isConfirmed) return;
-
-        try {
-            await axios.delete(`${API}/api/comments/${commentId}`);
-            setComments((prev) => prev.filter((c) => c._id !== commentId));
-        } catch (error) {
-            Swal.fire({
-                title: "Failed!",
-                text: error.response?.data?.message || "Could not delete comment.",
-                icon: "error",
-                confirmButtonColor: "#ef4444",
-                background: "#111111",
-                color: "#ffffff",
-            });
-        }
     };
 
     return (
         <div className="space-y-6">
-
             {/* Header */}
             <div className="flex items-center gap-2">
                 <MessageSquare size={18} className="text-orange-500" />
@@ -153,8 +189,15 @@ export default function CommentsSection({ ideaId }) {
             {/* Comment Input —only logged in user */}
             {currentUser ? (
                 <div className="flex gap-3 items-start">
-                    <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center shrink-0 text-orange-500 text-xs font-black uppercase">
-                        {currentUser.name?.[0] || "?"}
+                    <div className="relative w-8 h-8 shrink-0">
+                        <Image
+                            src={currentUser.image || "/default-avatar.png"}
+                            alt={currentUser.name || "User Profile"}
+                            fill
+                            className="rounded-full object-cover"
+                            sizes="32px"
+                            suppressHydrationWarning
+                        />
                     </div>
                     <div className="flex-1 flex gap-2">
                         <textarea
@@ -169,10 +212,11 @@ export default function CommentsSection({ ideaId }) {
                             disabled={submitting || !newComment.trim()}
                             className="self-end px-4 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white rounded-xl transition-all"
                         >
-                            {submitting
-                                ? <Loader2 size={16} className="animate-spin" />
-                                : <Send size={16} />
-                            }
+                            {submitting ? (
+                                <Loader2 size={16} className="animate-spin" />
+                            ) : (
+                                <Send size={16} />
+                            )}
                         </button>
                     </div>
                 </div>
@@ -237,10 +281,11 @@ export default function CommentsSection({ ideaId }) {
                                                 disabled={editSubmitting}
                                                 className="p-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-all"
                                             >
-                                                {editSubmitting
-                                                    ? <Loader2 size={13} className="animate-spin" />
-                                                    : <Check size={13} />
-                                                }
+                                                {editSubmitting ? (
+                                                    <Loader2 size={13} className="animate-spin" />
+                                                ) : (
+                                                    <Check size={13} />
+                                                )}
                                             </button>
                                             <button
                                                 onClick={cancelEdit}
