@@ -6,8 +6,8 @@ import axios from "axios";
 import {
     Lightbulb, Layers, ThumbsUp, Calendar, ArrowRight, ShieldAlert, Plus
 } from "lucide-react";
-import ActivityButton from "./DeleteIdeaButton";
 import Loading from "@/app/loading";
+import ActivityButton from "./ActivityButton";
 
 
 const API = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -37,6 +37,10 @@ export default function MyIdeasPage() {
 
         fetchIdeas();
     }, []);
+
+    const handleDeleteSuccess = (deletedId) => {
+        setIdeas((prev) => prev.filter((idea) => idea._id !== deletedId));
+    };
 
     const totalIdeas = ideas.length;
     const totalReactions = ideas.reduce((acc, idea) => acc + (idea.likes?.length || 0), 0);
@@ -165,7 +169,11 @@ export default function MyIdeasPage() {
                                             </td>
 
                                             <td className="py-5 px-6 text-right whitespace-nowrap">
-                                                <ActivityButton ideaId={idea._id} ideaTitle={idea.title} />
+                                                <ActivityButton
+                                                    ideaId={idea._id}
+                                                    ideaTitle={idea.title}
+                                                    onDeleteSuccess={handleDeleteSuccess}
+                                                />
                                             </td>
 
                                         </tr>

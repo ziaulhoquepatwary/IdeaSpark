@@ -2,17 +2,14 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { Eye, Edit3, Trash2 } from "lucide-react";
 
-
 const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-export default function ActivityButton({ ideaId, ideaTitle }) {
+export default function ActivityButton({ ideaId, ideaTitle, onDeleteSuccess }) {
     const [isDeleting, setIsDeleting] = useState(false);
-    const router = useRouter();
 
     const handleDelete = async () => {
         const isDarkMode = document.documentElement.classList.contains("dark");
@@ -36,13 +33,11 @@ export default function ActivityButton({ ideaId, ideaTitle }) {
 
             const { data } = await axios.delete(
                 `${API}/api/ideas/${ideaId}`,
-                {
-                    withCredentials: true,
-                }
+                { withCredentials: true }
             );
 
             if (data.success) {
-                Swal.fire({
+                await Swal.fire({
                     title: "Deleted!",
                     text: "Your innovation pipeline has been terminated.",
                     icon: "success",
@@ -51,7 +46,8 @@ export default function ActivityButton({ ideaId, ideaTitle }) {
                     background: isDarkMode ? "#111111" : "#ffffff",
                     color: isDarkMode ? "#ffffff" : "#000000",
                 });
-                router.refresh();
+
+                onDeleteSuccess(ideaId);
             }
         } catch (err) {
             Swal.fire({
@@ -75,7 +71,6 @@ export default function ActivityButton({ ideaId, ideaTitle }) {
             >
                 <Eye size={15} />
             </Link>
-
             <Link
                 href={`/ideas/edit/${ideaId}`}
                 className="p-2 text-gray-400 hover:text-orange-500 hover:bg-orange-500/10 rounded-xl transition-all"
@@ -83,7 +78,6 @@ export default function ActivityButton({ ideaId, ideaTitle }) {
             >
                 <Edit3 size={15} />
             </Link>
-
             <button
                 type="button"
                 onClick={handleDelete}
