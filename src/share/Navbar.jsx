@@ -155,7 +155,13 @@ const Navbar = () => {
                                                 <button
                                                     onClick={() => {
                                                         setAvatarMenuOpen(false);
-                                                        authClient.signOut();
+                                                        authClient.signOut({
+                                                            fetchOptions: {
+                                                                onSuccess: () => {
+                                                                    window.location.href = "/";
+                                                                }
+                                                            }
+                                                        });
                                                     }}
                                                     className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                                                 >
@@ -249,7 +255,13 @@ const Navbar = () => {
                                 <button
                                     onClick={() => {
                                         setIsOpen(false);
-                                        authClient.signOut();
+                                        authClient.signOut({
+                                            fetchOptions: {
+                                                onSuccess: () => {
+                                                    window.location.href = "/";
+                                                }
+                                            }
+                                        });
                                     }}
                                     className="flex items-center justify-center gap-2 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 w-full py-3 rounded-xl font-medium hover:bg-red-100 dark:hover:bg-red-950/40 transition-colors"
                                 >
