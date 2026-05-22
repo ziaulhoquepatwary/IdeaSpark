@@ -3,14 +3,13 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import {
-    Heart, MessageSquare, Wallet, Users,
-    Target, Lightbulb, Loader2, AlertCircle,
-} from "lucide-react";
+import { Heart, MessageSquare, Wallet, Users, Target, Lightbulb, Loader2, AlertCircle, } from "lucide-react";
 import axios from "axios";
 import Loading from "@/app/loading";
 import { authClient } from "@/lib/auth-client";
 import CommentsSection from "@/components/CommentsSection";
+
+const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const IdeaDetailsPage = () => {
     const { id } = useParams();
@@ -39,7 +38,7 @@ const IdeaDetailsPage = () => {
             try {
                 setLoading(true);
                 const res = await axios.get(
-                    `http://localhost:5000/api/ideas/${id}`,
+                    `${API}/api/ideas/${id}`,
                     { withCredentials: true }
                 );
                 setIdea(res.data.idea);
@@ -66,7 +65,7 @@ const IdeaDetailsPage = () => {
         setLikeLoading(true);
         try {
             const res = await axios.put(
-                `http://localhost:5000/api/ideas/${id}/like`,
+                `${API}/api/ideas/${id}/like`,
                 {},
                 { withCredentials: true }
             );
@@ -168,11 +167,10 @@ const IdeaDetailsPage = () => {
                         <button
                             onClick={handleLike}
                             disabled={likeLoading || !session}
-                            className={`p-3 rounded-xl transition-all duration-300 cursor-pointer ${
-                                liked
-                                    ? "bg-red-500/20 text-red-500 scale-105"
-                                    : "bg-gray-200/50 dark:bg-zinc-800 text-gray-400 hover:text-red-500"
-                            }`}
+                            className={`p-3 rounded-xl transition-all duration-300 cursor-pointer ${liked
+                                ? "bg-red-500/20 text-red-500 scale-105"
+                                : "bg-gray-200/50 dark:bg-zinc-800 text-gray-400 hover:text-red-500"
+                                }`}
                         >
                             {likeLoading
                                 ? <Loader2 size={20} className="animate-spin" />

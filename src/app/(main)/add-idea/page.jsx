@@ -28,13 +28,12 @@ function AddIdea() {
                         : data.tags,
             };
 
-            const res = await axios.post(
-                "http://localhost:5000/api/ideas",
-                formattedData,
-                {
-                    withCredentials: true,
-                }
-            );
+            const API = axios.create({
+                baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
+                withCredentials: true,
+            });
+
+            const res = await API.post("/api/ideas", formattedData);
 
             await Swal.fire({
                 icon: "success",

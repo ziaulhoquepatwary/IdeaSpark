@@ -74,6 +74,7 @@ const LoginPage = () => {
     const handleGoogleLogin = async () => {
         await authClient.signIn.social({
             provider: "google",
+            callbackURL: `${window.location.origin}${getRedirectUrl()}`,
         });
     };
 

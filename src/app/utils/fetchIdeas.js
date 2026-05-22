@@ -1,3 +1,5 @@
+const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 async function fetchIdeas({ search, category, sortBy, page }) {
     const params = new URLSearchParams();
     if (search) params.set("search", search);
@@ -6,8 +8,9 @@ async function fetchIdeas({ search, category, sortBy, page }) {
     if (page) params.set("page", page);
     params.set("limit", "12");
 
+
     const res = await fetch(
-        `http://localhost:5000/api/ideas?${params.toString()}`,
+        `${API}/api/ideas?${params.toString()}`,
         { cache: "no-store" }
     );
 

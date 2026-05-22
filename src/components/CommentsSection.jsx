@@ -2,17 +2,18 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { authClient } from "@/lib/auth-client"; // Better Auth
+import { authClient } from "@/lib/auth-client";
 import { MessageSquare, Send, Pencil, Trash2, Loader2, X, Check } from "lucide-react";
 import Swal from "sweetalert2";
 import Image from "next/image";
 
 axios.defaults.withCredentials = true;
 
-const API = "http://localhost:5000";
+const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function CommentsSection({ ideaId }) {
     const { data: session } = authClient.useSession();
+    // console.log("Session in CommentsSection:", session);
     const currentUser = session?.user;
 
     const [comments, setComments] = useState([]);
@@ -45,9 +46,10 @@ export default function CommentsSection({ ideaId }) {
 
         setSubmitting(true);
         try {
-            const res = await axios.post(`${API}/api/comments/${ideaId}`, {
-                content: newComment.trim(),
-            });
+            const res = await axios.post(`${API}/api/comments/${ideaId}`,
+                {
+                    content: newComment.trim(),
+                });
 
             setComments((prev) => [res.data.comment, ...prev]);
             setNewComment("");

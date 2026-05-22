@@ -8,12 +8,14 @@ import {
 import ActivityButton from "./DeleteIdeaButton";
 
 
+const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 async function getMyIdeas() {
     try {
         const cookieStore = await cookies();
         const cookieHeader = cookieStore.toString();
 
-        const { data } = await axios.get("http://localhost:5000/api/ideas/my-ideas", {
+        const { data } = await axios.get(`${API}/api/ideas/my-ideas`, {
             headers: {
                 Cookie: cookieHeader,
             },

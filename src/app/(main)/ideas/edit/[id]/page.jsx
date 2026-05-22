@@ -5,8 +5,14 @@ import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Lightbulb, FileText, AlignLeft, Layers, Hash, Image as ImageIcon, Wallet, Users, Target, ShieldAlert, Loader2, ArrowLeft, RefreshCw } from "lucide-react";
 import Swal from "sweetalert2";
+import axios from "axios";
 
 const categories = ["Tech", "Health", "AI", "Education", "Finance", "Environment", "Other"];
+
+const API = axios.create({
+    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
+    withCredentials: true,
+});
 
 export default function EditIdeaPage() {
     const params = useParams();
@@ -22,25 +28,26 @@ export default function EditIdeaPage() {
 
         const getExistingIdea = async () => {
             try {
-                const res = await fetch(`http://localhost:5000/api/ideas/${id}`, {
-                    credentials: "include",
-                });
+                const res = await API.get(`/api/ideas/${id}`);
 
-                const data = await res.json();
-
-                if (data.success) {
+                if (res.data && res.data.success) {
                     const formattedIdea = {
-                        ...data.idea,
-                        tags: data.idea.tags?.join(", ") || "",
+                        ...res.data.idea,
+                        tags: res.data.idea.tags?.join(", ") || "",
                     };
 
                     setIdeaData(formattedIdea);
 
-                    // form এ data inject
                     reset(formattedIdea);
                 }
             } catch (err) {
-                console.error("Error fetching idea", err);
+                console.error("Error fetching idea with axios:", err);
+                Swal.fire({
+                    title: "Error!",
+                    text: err.response?.data?.message || "Could not fetch the idea data.",
+                    icon: "error",
+                    confirmButtonColor: "#ef4444",
+                });
             }
         };
 
@@ -49,19 +56,16 @@ export default function EditIdeaPage() {
 
     const onUpdateForm = async (formData) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/ideas/${id}`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-                body: JSON.stringify(formData),
-            });
+            const formattedData = {
+                ...formData,
+                tags: typeof formData.tags === "string"
+                    ? formData.tags.split(",").map(tag => tag.trim()).filter(Boolean)
+                    : formData.tags
+            };
 
-            const data = await res.json();
+            const res = await API.patch(`/api/ideas/${id}`, formattedData);
 
-            if (data.success) {
-
+            if (res.data && res.data.success) {
                 await Swal.fire({
                     title: "Updated!",
                     text: "Innovation node updated successfully.",
@@ -72,23 +76,22 @@ export default function EditIdeaPage() {
                 });
 
                 router.push("/my-ideas");
-
             } else {
                 Swal.fire({
                     title: "Failed!",
-                    text: data.message || "Update failed.",
+                    text: res.data?.message || "Update failed.",
                     icon: "error",
                     confirmButtonColor: "#ef4444",
                 });
             }
 
         } catch (error) {
-
-            console.error("Update failed", error);
+            console.error("Update failed with axios:", error);
+            const errorMessage = error.response?.data?.message || "Something went wrong.";
 
             Swal.fire({
                 title: "Error!",
-                text: "Something went wrong.",
+                text: errorMessage,
                 icon: "error",
                 confirmButtonColor: "#ef4444",
             });

@@ -7,6 +7,9 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { Eye, Edit3, Trash2 } from "lucide-react";
 
+
+const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 export default function ActivityButton({ ideaId, ideaTitle }) {
     const [isDeleting, setIsDeleting] = useState(false);
     const router = useRouter();
@@ -32,7 +35,7 @@ export default function ActivityButton({ ideaId, ideaTitle }) {
             setIsDeleting(true);
 
             const { data } = await axios.delete(
-                `http://localhost:5000/api/ideas/${ideaId}`,
+                `${API}/api/ideas/${ideaId}`,
                 {
                     withCredentials: true,
                 }

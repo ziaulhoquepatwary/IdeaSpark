@@ -13,9 +13,12 @@ function safeSlice(text, limit) {
     return text.slice(0, limit) + "..."
 }
 
+const API = process.env.NEXT_PUBLIC_BACKEND_URL
+
 function IdeaCart({ idea }) {
     const router = useRouter();
     const { data: session } = authClient.useSession();
+    // console.log("Session in IdeaCart:", session);
     const alreadyLiked = idea.likes?.includes(session?.user?.id) || false;
 
     const [liked, setLiked] = useState(false);
@@ -36,7 +39,7 @@ function IdeaCart({ idea }) {
         setLoading(true);
         try {
             const res = await axios.put(
-                `http://localhost:5000/api/ideas/${idea._id}/like`,
+                `${API}/api/ideas/${idea._id}/like`,
                 {},
                 { withCredentials: true }
             );

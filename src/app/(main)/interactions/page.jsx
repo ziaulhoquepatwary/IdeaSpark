@@ -9,7 +9,7 @@ import {
 import axios from "axios";
 import { authClient } from "@/lib/auth-client";
 
-const API = "http://localhost:5000";
+const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function MyInteractions() {
     const { data: session, isPending } = authClient.useSession();

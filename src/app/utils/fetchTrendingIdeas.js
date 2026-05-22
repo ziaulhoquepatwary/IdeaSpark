@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const API = process.env.NEXT_PUBLIC_BACKEND_URL;
+
 async function fetchTrendingIdeas() {
-    const response = await axios.get("http://127.0.0.1:5000/api/ideas", {
+    const response = await axios.get(`${API}/api/ideas`, {
         params: {
             limit: 6,
             sortBy: "createdAt",

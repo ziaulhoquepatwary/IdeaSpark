@@ -30,7 +30,7 @@ function Register() {
             name: userData.name,
             email: userData.email,
             password: userData.password,
-            image: userData.imageUrl
+            image: userData.imageUrl,
         })
 
         console.log(data, error);
@@ -50,6 +50,7 @@ function Register() {
     const handleGoogleLogin = async () => {
         await authClient.signIn.social({
             provider: "google",
+            callbackURL: `${window.location.origin}${getRedirectUrl()}`,
         });
     };
 
