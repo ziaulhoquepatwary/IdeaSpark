@@ -1,43 +1,49 @@
-import React from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { cookies } from "next/headers";
 import {
     Lightbulb, Layers, ThumbsUp, Calendar, ArrowRight, ShieldAlert, Plus
 } from "lucide-react";
 import ActivityButton from "./DeleteIdeaButton";
+import Loading from "@/app/loading";
 
 
 const API = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-async function getMyIdeas() {
-    try {
-        const cookieStore = await cookies();
-        const cookieHeader = cookieStore.toString();
+export default function MyIdeasPage() {
+    const [ideas, setIdeas] = useState([]);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-        const { data } = await axios.get(`${API}/api/ideas/my-ideas`, {
-            headers: {
-                Cookie: cookieHeader,
-            },
-        });
-
-        if (data.success) {
-            return { ideas: data.ideas, error: null };
-        }
-        return { ideas: [], error: "Failed to load ideas." };
-    } catch (err) {
-        return {
-            ideas: [],
-            error: err.response?.data?.message || "Failed to connect to server."
+    useEffect(() => {
+        const fetchIdeas = async () => {
+            try {
+                const { data } = await axios.get(`${API}/api/ideas/my-ideas`, {
+                    withCredentials: true,
+                });
+                if (data.success) {
+                    setIdeas(data.ideas);
+                } else {
+                    setError("Failed to load ideas.");
+                }
+            } catch (err) {
+                setError(err.response?.data?.message || "Failed to connect to server.");
+            } finally {
+                setLoading(false);
+            }
         };
-    }
-}
 
-export default async function MyIdeasPage() {
-    const { ideas, error } = await getMyIdeas();
+        fetchIdeas();
+    }, []);
 
     const totalIdeas = ideas.length;
     const totalReactions = ideas.reduce((acc, idea) => acc + (idea.likes?.length || 0), 0);
+
+    if (loading) {
+        return <Loading />;
+    }
 
     if (error) {
         return (
